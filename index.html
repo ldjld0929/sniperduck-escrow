@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sniperduck Global Escrow</title>
+    <script src="https://cdn.jsdelivr.net/npm/tronweb@4.4.0/dist/TronWeb.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 500px; width: 100%; background: #1e1e1e; padding: 25px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); box-sizing: border-box; }
+        h1 { text-align: center; color: #f1b90c; font-size: 24px; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #aaa; font-size: 13px; margin-top: 0; margin-bottom: 25px; }
+        .section { background: #2a2a2a; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .section h2 { font-size: 16px; color: #f1b90c; margin-top: 0; margin-bottom: 12px; border-left: 4px solid #f1b90c; padding-left: 8px; }
+        label { display: block; font-size: 13px; color: #ccc; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; margin-bottom: 15px; background: #333; border: 1px solid #444; border-radius: 6px; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #f1b90c; border: none; border-radius: 6px; color: #121212; font-weight: bold; font-size: 15px; cursor: pointer; }
+        button:hover { background: #dba80b; }
+        .status { font-size: 13px; color: #00ffcc; word-break: break-all; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎯 Sniperduck Global Escrow</h1>
+    <p class="subtitle">Secure P2P USDT Vault (0.5% Platform Fee)</p>
+
+    <div class="section">
+        <h2>Step 1: Wallet Connection (지갑 연결)</h2>
+        <button id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+        <div id="walletStatus" class="status">Wallet connection required.</div>
+    </div>
+
+    <div class="section">
+        <h2>Step 2: Create Escrow (Buyer Only)</h2>
+        <label>Seller's TRON Address (판매자 주소)</label>
+        <input type="text" id="sellerAddress" placeholder="T-address">
+        <label>Lock Amount (USDT 수량)</label>
+        <input type="number" id="usdtAmount" placeholder="e.g., 100">
+        <button onclick="createEscrow()">Deposit & Lock USDT</button>
+        <div id="createStatus" class="status"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 3: Notify Payment (Seller Only)</h2>
+        <label>Escrow ID (금고 번호)</label>
+        <input type="number" id="notifyId" placeholder="e.g., 1">
+        <button onclick="notifyPayment()">Send Payment Notification</button>
+        <div id="notifyStatus" class="status"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 4: Release Funds (Buyer Only)</h2>
+        <label>Escrow ID (금고 번호)</label>
+        <input type="number" id="releaseId" placeholder="e.g., 1">
+        <button onclick="releaseEscrow()">Release USDT to Seller</button>
+        <div id="releaseStatus" class="status"></div>
+    </div>
+</div>
+
+<script>
+    // 방금 트론스캔에서 확인한 '진짜 배포된 주소'를 완벽하게 심어두었습니다!
+    const contractAddress = "TQx6tTywumt7A1Jjju1CFYUL3GlxZkp1ao"; 
+    let userAddress = "";
+
+    async function connectWallet() {
+        if (window.tronLink) {
+            try {
+                await window.tronLink.request({ method: 'tron_requestAccounts' });
+                if (window.tronWeb) {
+                    userAddress = window.tronWeb.defaultAddress.base58;
+                    document.getElementById("walletStatus").innerText = "Connected: " + userAddress;
+                    document.getElementById("connectBtn").innerText = "Wallet Connected";
+                }
+            } catch (e) { document.getElementById("walletStatus").innerText = "Denied."; }
+        } else { alert("Use TokenPocket/TronLink DApp browser."); }
+    }
+
+    // 1. 에스크로 생성 함수
+    async function createEscrow() {
+        if (!userAddress) { alert("Connect wallet first."); return; }
+        const seller = document.getElementById("sellerAddress").value;
+        const amount = document.getElementById("usdtAmount").value;
+        try {
+            document.getElementById("createStatus").innerText = "Processing...";
+            const contract = await window.tronWeb.contract().at(contractAddress);
+            const sunAmount = window.tronWeb.toSun(amount); 
+            let tx = await contract.createEscrow(seller, sunAmount).send();
+            document.getElementById("createStatus").innerText = "Success! TX ID: " + tx;
+        } catch (error) { document.getElementById("createStatus").innerText = "Error: " + error.message; }
+    }
+
+    // 2. 결제 알림 함수
+    async function notifyPayment() {
+        if (!userAddress) { alert("Connect wallet first."); return; }
+        const id = document.getElementById("notifyId").value;
+        try {
+            document.getElementById("notifyStatus").innerText = "Notifying...";
+            const contract = await window.tronWeb.contract().at(contractAddress);
+            let tx = await contract.notifyPayment(id).send();
+            document.getElementById("notifyStatus").innerText = "Notification Sent! TX: " + tx;
+        } catch (error) { document.getElementById("notifyStatus").innerText = "Error: " + error.message; }
+    }
+
+    // 3. 자금 해제 및 0.5% 수수료 자동 차감 전송 함수
+    async function releaseEscrow() {
+        if (!userAddress) { alert("Connect wallet first."); return; }
+        const id = document.getElementById("releaseId").value;
+        try {
+            document.getElementById("releaseStatus").innerText = "Releasing...";
+            const contract = await window.tronWeb.contract().at(contractAddress);
+            let tx = await contract.releaseEscrow(id).send();
+            document.getElementById("releaseStatus").innerText = "Released! TX: " + tx;
+        } catch (error) { document.getElementById("releaseStatus").innerText = "Error: " + error.message; }
+    }
+</script>
+</body>
+</html>
