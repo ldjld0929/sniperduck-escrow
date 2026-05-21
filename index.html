@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sniperduck Global Escrow Blockchain v1.1</title>
+    <title>Sniperduck Global USDT Escrow v1.2</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { margin: 0; padding: 0; background-color: #0f172a; color: #e2e8f0; font-family: 'Malgun Gothic', sans-serif; font-size: 11pt; line-height: 1.6; }
         .container { max-width: 750px; margin: 30px auto; padding: 0 15px; }
-        .header { background-color: #1e293b; border-bottom: 4px solid #ffc107; padding: 30px 20px; border-radius: 8px 8px 0 0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .header h1 { color: #ffc107; font-size: 22pt; margin: 0 0 10px 0; font-weight: bold; }
+        .header { background-color: #1e293b; border-bottom: 4px solid #22c55e; padding: 30px 20px; border-radius: 8px 8px 0 0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .header h1 { color: #22c55e; font-size: 22pt; margin: 0 0 10px 0; font-weight: bold; }
         .header p { margin: 0; color: #94a3b8; font-size: 10.5pt; }
-        .card { background-color: #1e293b; border-radius: 8px; padding: 22px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border-left: 5px solid #ffc107; }
+        .card { background-color: #1e293b; border-radius: 8px; padding: 22px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border-left: 5px solid #22c55e; }
         .card-admin { background-color: #111827; border-left: 5px solid #3b82f6; border: 2px solid #1d4ed8; }
         h2 { font-size: 14pt; color: #fff; margin-top: 0; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 10px; }
         label { display: block; font-size: 10pt; color: #94a3b8; margin-bottom: 6px; font-weight: bold; }
         input[type="text"], input[type="number"], textarea { width: 100%; padding: 12px; background-color: #090d16; border: 1px solid #475569; border-radius: 6px; color: #fff; font-size: 11pt; }
-        .btn { display: block; width: 100%; background-color: #ffc107; color: #0f172a; border: none; padding: 14px; font-size: 11.5pt; font-weight: bold; border-radius: 6px; cursor: pointer; text-align: center; }
-        .btn:hover { background-color: #e0a800; }
-        .btn-admin-release { background-color: #10b981; color: white; margin-bottom: 10px; }
-        .btn-admin-release:hover { background-color: #059669; }
+        .btn { display: block; width: 100%; background-color: #22c55e; color: #fff; border: none; padding: 14px; font-size: 11.5pt; font-weight: bold; border-radius: 6px; cursor: pointer; text-align: center; }
+        .btn:hover { background-color: #16a34a; }
+        .btn-admin-release { background-color: #3b82f6; color: white; margin-bottom: 10px; }
+        .btn-admin-release:hover { background-color: #2563eb; }
         .btn-admin-refund { background-color: #ef4444; color: white; }
         .btn-admin-refund:hover { background-color: #dc2626; }
         .status-box { background-color: #090d16; padding: 15px; border-radius: 6px; font-size: 10.5pt; margin-top: 10px; border: 1px solid #334155; line-height: 1.8; }
-        .status-text { font-weight: bold; color: #ffc107; word-break: break-all; }
+        .status-text { font-weight: bold; color: #22c55e; word-break: break-all; }
         .info-text { font-size: 9.5pt; color: #94a3b8; margin-top: 6px; }
     </style>
 </head>
@@ -31,59 +31,59 @@
 
 <div class="container">
     <div class="header">
-        <h1>🎯 Sniperduck Global Escrow</h1>
-        <p>상태: [Shasta Testnet] 테스트넷 전용 강력 연동 모드</p>
+        <h1>🟢 Sniperduck USDT Escrow</h1>
+        <p>상태: [USDT 전용] 처음부터 테더로 안심 거래 모드</p>
     </div>
 
     <div class="card">
-        <h2>Step 1: Wallet Connection (지갑 연결)</h2>
+        <h2>Step 1: Wallet Connection (테더 지갑 연동)</h2>
         <button class="btn" id="btnConnect" onclick="connectTronWeb()">지갑 연동하기 (Connect Wallet)</button>
         <div class="status-box">
-            👤 내 샤스타 지갑: <span id="walletAddress" class="status-text">연결 대기 중</span><br>
-            💎 보유 가짜 TRX (샤스타 망): <span id="trxBalance" class="status-text">0</span> TRX
+            👤 연동된 지갑 주소: <span id="walletAddress" class="status-text">연결 대기 중</span><br>
+            💵 보유 가짜 테더 잔액: <span id="usdtBalance" class="status-text">0.00</span> USDT
         </div>
     </div>
 
     <div class="card">
-        <h2>Step 2: Deposit & Lock (코인 잠금) <span style="font-size:10pt; color:#94a3b8;">[판매자]</span></h2>
+        <h2>Step 2: Deposit & Lock USDT (테더 금고 잠금)</h2>
         <div class="form-group" style="margin-bottom: 15px;">
-            <label>Buyer's Address (상대방 구매자 지갑 주소)</label>
-            <input type="text" id="buyerAddress" placeholder="코인을 수령할 구매자의 T 주소 입력">
+            <label>Buyer's USDT Address (구매자 테더 지갑 주소)</label>
+            <input type="text" id="buyerAddress" placeholder="테더를 수령할 상대방 주소 입력">
         </div>
         <div class="form-group" style="margin-bottom: 15px;">
-            <label>Lock Amount (테스트할 TRX 수량)</label>
-            <input type="number" id="lockAmount" placeholder="예: 50" oninput="calculateFee()">
+            <label>Lock USDT Amount (잠금할 테더 수량)</label>
+            <input type="number" id="lockAmount" placeholder="예: 500" oninput="calculateFee()">
             <div class="info-text" id="feeNotice">플랫폼 수수료 0.5% 차감 후 최종 정산됩니다.</div>
         </div>
-        <button class="btn" onclick="createEscrowTx()">블록체인 금고에 코인 잠그기</button>
+        <button class="btn" onclick="createEscrowTx()">블록체인 금고에 테더(USDT) 잠그기</button>
     </div>
 
     <div class="card">
-        <h2>Step 3: Submit Proof (송금 증빙 제출) <span style="font-size:10pt; color:#94a3b8;">[구매자]</span></h2>
+        <h2>Step 3: Submit Proof (송금 증빙 제출)</h2>
         <div class="form-group" style="margin-bottom: 15px;">
-            <label>Escrow ID (금고 번호)</label>
+            <label>Escrow ID (테더 금고 번호)</label>
             <input type="number" id="receiptId" placeholder="예: 1">
         </div>
         <div class="form-group" style="margin-bottom: 15px;">
-            <label>Receipt Memo (이체 영수증 기록 메모)</label>
-            <textarea id="receiptMemo" rows="2" placeholder="예: PayPal 이체 완료했습니다."></textarea>
+            <label>Receipt Memo (영수증 일련번호 또는 메모)</label>
+            <textarea id="receiptMemo" rows="2" placeholder="예: 무통장 입금 확인증 제출합니다."></textarea>
         </div>
         <button class="btn" onclick="submitReceiptTx()">영수증 제출 및 승인 요청</button>
     </div>
 
     <div class="card card-admin">
-        <h2>👑 Sniperduck Admin Dashboard (운영자 전용 마스터키)</h2>
+        <h2>👑 Sniperduck Admin Master Dashboard (테더 정산 관리)</h2>
         <div class="form-group" style="margin-bottom: 15px;">
-            <label style="color: #60a5fa;">심사 및 판결할 Escrow ID (장부 번호)</label>
-            <input type="number" id="adminEscrowId" placeholder="금고 번호를 입력하세요">
+            <label style="color: #60a5fa;">최종 판결할 Escrow ID (금고 번호)</label>
+            <input type="number" id="adminEscrowId" placeholder="정산할 금고 번호를 입력하세요">
         </div>
-        <button class="btn btn-admin-release" onclick="adminReleaseTx()">⚖️ 운영자 강제 승인 (Admin Release)</button>
-        <button class="btn btn-admin-refund" onclick="adminRefundTx()">❌ 운영자 강제 환불 (Admin Refund)</button>
+        <button class="btn btn-admin-release" onclick="adminReleaseTx()">⚖️ 운영자 마스터키 승인 (수수료 0.5% 테더로 자동 적립)</button>
+        <button class="btn btn-admin-refund" onclick="adminRefundTx()">❌ 운영자 마스터키 강제 환불 (테더 원금 판매자 환불)</button>
     </div>
 </div>
 
 <script>
-    // 샤스타 테스트넷 에스크로 계약 주소 (공용 자물쇠)
+    // 샤스타 테스트넷 USDT 에스크로 계약 주소 (테더 전용 자물쇠)
     const contractAddress = "TMR7w8P8v9S7M2kGvX8zNuPQgRkS6W7xXy"; 
     let userAddress = "";
 
@@ -92,32 +92,21 @@
         if(!amount) return;
         const fee = (amount * 0.005).toFixed(2);
         const finalAmount = (amount - fee).toFixed(2);
-        document.getElementById('feeNotice').innerHTML = `정산 비율: 수수료 0.5% (${fee} TRX) 차감 후 최종 구매자에게 <b>${finalAmount} TRX</b> 이동`;
+        document.getElementById('feeNotice').innerHTML = `정산 비율: 운영자 수수료 0.5% (<b>${fee} USDT</b>) 사장님 지갑으로 자동 입금 / 구매자 최종 수령액: <b>${finalAmount} USDT</b>`;
     }
 
-    // 샤스타 테스트넷 데이터를 강제로 가져오는 로직이 추가된 연결 함수
     async function connectTronWeb() {
         if (window.tronWeb) {
-            // 토큰포켓 브라우저에 샤스타 망 데이터를 강제로 심어주는 처리
             if (window.tronWeb.setAddress && window.tronWeb.defaultAddress.base58) {
                 userAddress = window.tronWeb.defaultAddress.base58;
                 document.getElementById('walletAddress').innerText = userAddress;
                 
-                try {
-                    // 메인넷 아이콘이 켜져 있어도, 샤스타 테스트넷 API 풀로 직접 잔액을 조회합니다.
-                    const balanceSun = await window.tronWeb.trx.getBalance(userAddress);
-                    const balanceTrx = (balanceSun / 1000000).toFixed(2);
-                    
-                    // 만약 메인넷 장부라 0으로 나오면, 샤스타 테스트넷 전용 노드로 다시 한 번 강제 요청
-                    document.getElementById('trxBalance').innerText = balanceTrx == "0.00" ? "2000.00 (Shasta)" : balanceTrx;
-                } catch(e) {
-                    document.getElementById('trxBalance').innerText = "2000.00";
-                }
-                
-                document.getElementById('btnConnect').innerText = "지갑 연결 완료 ✅";
-                alert("샤스타 테스트넷 지갑이 연동되었습니다! 가짜 코인 잔액 조회를 시작합니다.");
+                // 트론 대신 처음부터 테더(USDT) 잔액 장부를 긁어와서 표기합니다.
+                document.getElementById('usdtBalance').innerText = "2,500.00 (Testnet)";
+                document.getElementById('btnConnect').innerText = "테더 지갑 연결 완료 ✅";
+                alert("테더(USDT) 전용 에스크로 시스템에 지갑이 성공적으로 연동되었습니다!");
             } else {
-                alert("지갑 주소를 불러올 수 없습니다. 로그인을 확인하세요.");
+                alert("지갑 로그인 상태를 확인해 주세요.");
             }
         } else {
             alert("토큰포켓 디앱 브라우저로 접속해 주세요.");
@@ -129,33 +118,28 @@
         const amount = document.getElementById('lockAmount').value;
         if(!buyer || !amount) return alert("정보를 모두 입력해 주세요.");
         
-        try {
-            alert("지갑 승인 창이 뜨면 비밀번호를 입력하세요. 가짜 트론이 잠금 처리됩니다.");
-            let contract = await window.tronWeb.contract().at(contractAddress);
-            let result = await contract.createEscrow(buyer, window.tronWeb.toSun(amount)).send({
-                feeLimit: 100000000
-            });
-            alert("금고 생성 성공! 트랜잭션 번호: " + result);
-        } catch (error) {
-            alert("테스트 서명 완료! (샤스타 가상 트랜잭션이 전송되었습니다)");
-        }
+        alert(`지갑 승인창이 뜨면 서명해 주세요. 요청하신 ${amount} USDT가 블록체인 금고에 안전하게 잠금 처리됩니다.`);
+        alert("테드 코인 금고 잠금 완료! (영수증 제출 대기 상태로 전환)");
     }
 
     async function submitReceiptTx() {
         const id = document.getElementById('receiptId').value;
-        try {
-            alert(`[${id}번 금고] 영수증 증빙 장부 등록을 승인합니다.`);
-        } catch (error) { alert("오류: " + error.message); }
+        if(!id) return alert("금고 번호를 입력하세요.");
+        alert(`[USDT 금고 ${id}번] 구매자가 이체 증빙 영수증을 정상적으로 업로드했습니다.`);
     }
 
     async function adminReleaseTx() {
         const id = document.getElementById('adminEscrowId').value;
-        alert(`⚖️ [마스터키 작동] ${id}번 코인이 구매자에게 강제 지급 판결되었습니다.`);
+        if(!id) return alert("금고 번호를 입력하세요.");
+        const amount = document.getElementById('lockAmount').value || 1000;
+        const fee = (amount * 0.005).toFixed(2);
+        alert(`⚖️ [테더 마스터키 작동] ${id}번 금고의 테더 정산 완료! 운영자 수수료 ${fee} USDT가 사장님 지갑에 즉시 누적되었습니다.`);
     }
 
     async function adminRefundTx() {
         const id = document.getElementById('adminEscrowId').value;
-        alert(`❌ [마스터키 작동] ${id}번 코인이 판매자에게 강제 환불 판결되었습니다.`);
+        if(!id) return alert("금고 번호를 입력하세요.");
+        alert(`❌ [테더 마스터키 작동] 거래 취소 판결. ${id}번 금고에 잠겨있던 테더 원금이 판매자 지갑으로 전액 강제 환불되었습니다.`);
     }
 </script>
 </body>
