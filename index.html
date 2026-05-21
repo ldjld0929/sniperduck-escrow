@@ -67,6 +67,10 @@
             <input type="text" id="buyerAddress" placeholder="0x...">
         </div>
         <div class="form-group" style="margin-bottom: 15px;">
+            <label>Seller & Buyer Telegram ID (For Fiat Account Exchange)</label>
+            <input type="text" id="telegramInfo" placeholder="e.g., Seller: @abc / Buyer: @xyz">
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
             <label>USDT Amount to Lock</label>
             <input type="number" id="lockAmount" placeholder="e.g., 1000" oninput="calculateFee()">
             <div class="info-text" id="feeNotice">Protocol architecture: A 0.5% platform usage fee will be routed programmatically upon settlement.</div>
@@ -86,10 +90,10 @@
 </div>
 
 <script>
-    // 💰 사장님의 통합 마스터 수수료 수취 지갑 주소가 완벽하게 고정되었습니다.
+    // 💰 사장님의 통합 마스터 수수료 수취 지갑 주소 고정
     const ownerFeeWallet = "0x6F9bC5a20b827575C6CB438E838B298AdF63008D"; 
 
-    // 각 블록체인 네트워크별 계약 메타데이터 (외주 개발자가 스마트 계약 배포 후 업데이트할 영역)
+    // 각 블록체인 네트워크별 계약 메타데이터 (외주 배포 후 업데이트할 영역)
     const networkConfig = {
         polygon: {
             contract: "0x...폴리곤_에스크로_계약_주소...",
@@ -105,7 +109,6 @@
         }
     };
 
-    // 표준 ERC20 및 에스크로 스마트 계약 통신용 ABI 레코드 구조 선언
     const escrowABI = [
         {"inputs":[{"internalType":"address","name":"_buyer","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"createEscrow","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},
         {"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"release","outputs":[],"stateMutability":"nonpayable","type":"function"},
@@ -141,18 +144,28 @@
         document.getElementById('feeNotice').innerHTML = `Routing Logic: Platform Fee 0.5% (<b>${fee} USDT</b>) splits to Master Node / Counterparty receives: <b>${finalAmount} USDT</b>`;
     }
 
-    // 토큰포켓 및 메타마스크 지갑 클라이언트 연동
+    // 🚀 토큰포켓 최신 보안 규격 대응 지갑 연동 함수 (전면 수정)
     async function connectWallet() {
-        if (window.ethereum) {
+        // 토큰포켓 내장 프로바이더 체인 추출 (일반 브라우저 하위 호환 포함)
+        const provider = window.ethereum || (window.tp && window.tp.ethereum) || window.trustwallet;
+        
+        if (provider) {
             try {
-                web3 = new Web3(window.ethereum);
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                userAddress = accounts[0];
+                web3 = new Web3(provider);
+                
+                // 네트워크 충돌로 인한 거절(Rejected) 에러 차단을 위해 주소 데이터부터 즉시 추출
+                const accounts = await provider.request({ method: 'eth_accounts' });
+                
+                if (accounts.length === 0) {
+                    // 주소가 비어있을 때만 수동 승인 요청 창 호출
+                    userAddress = (await provider.request({ method: 'eth_requestAccounts' }))[0];
+                } else {
+                    userAddress = accounts[0];
+                }
                 
                 document.getElementById('walletAddress').innerText = userAddress;
                 document.getElementById('btnConnect').innerText = "Wallet Connected ✅";
                 
-                // 선택된 체인에 맞는 테더 계약 인스턴스 할당
                 const selectedNetwork = document.getElementById('networkSelect').value;
                 currentContractAddress = networkConfig[selectedNetwork].contract;
                 currentUsdtAddress = networkConfig[selectedNetwork].usdt;
@@ -160,19 +173,33 @@
                 usdtContract = new web3.eth.Contract(usdtABI, currentUsdtAddress);
                 escrowContract = new web3.eth.Contract(escrowABI, currentContractAddress);
                 
-                // 해당 블록체인상의 실제 유저 USDT 원장 잔액 매핑
-                const rawBalance = await usdtContract.methods.balanceOf(userAddress).call();
-                const formattedBalance = (rawBalance / 1e6).toFixed(2); // EVM 계열 레이어2 테더 6자리 소수점 규격
-                document.getElementById('usdtBalance').innerText = formattedBalance;
+                // 토큰포켓 체인 불일치로 인한 원장 호출 에러 안전 마크 처리
+                try {
+                    const rawBalance = await usdtContract.methods.balanceOf(userAddress).call();
+                    const formattedBalance = (rawBalance / 1e6).toFixed(2);
+                    document.getElementById('usdtBalance').innerText = formattedBalance;
+                } catch(e) {
+                    document.getElementById('usdtBalance').innerText = "Connected (Switch TokenPocket to matching chain to view balance)";
+                }
             } catch (error) {
-                alert("Wallet handshake rejected by user.");
+                // 토큰포켓 네이티브 지갑 자동 맵핑 보완 시스템 트리거
+                if(window.tp && typeof window.tp.getWalletList === "function") {
+                    window.tp.getWalletList((res) => {
+                        if(res && res.data && res.data.length > 0) {
+                            userAddress = res.data[0].address;
+                            document.getElementById('walletAddress').innerText = userAddress;
+                            document.getElementById('btnConnect').innerText = "Wallet Connected (TP Auto) ✅";
+                        }
+                    });
+                } else {
+                    alert("Handshake process bypassed. Please ensure your active wallet chain is set to Polygon/Arbitrum/Base.");
+                }
             }
         } else {
-            alert("No dApp browser extension detected. Please execute this interface inside TokenPocket or MetaMask apps.");
+            alert("No Web3 provider detected. Ensure this page is running within TokenPocket App's Discover tab.");
         }
     }
 
-    // [Step 2 구현] 자산 동결 처리 함수
     async function createEscrowTx() {
         const buyer = document.getElementById('buyerAddress').value;
         const amount = document.getElementById('lockAmount').value;
@@ -184,26 +211,20 @@
         try {
             const valueInWei = amount * 1e6;
             alert(`Broadcasting transfer approval request for ${amount} USDT.`);
-            
-            // 1단계: 에스크로 분산 자판기 코드로의 테더 지출 권한 승인
             await usdtContract.methods.approve(currentContractAddress, valueInWei).send({ from: userAddress });
-            // 2단계: 스마트 계약 기반 온체인 금고 공간 생성 및 락업
             await escrowContract.methods.createEscrow(buyer, valueInWei).send({ from: userAddress });
-            
             alert("On-chain execution complete. Cryptographic token lock verified successfully.");
         } catch (error) {
             alert("State execution reverted: " + error.message);
         }
     }
 
-    // [Step 3 승인 구현] 오직 구매자 서명에 의한 자동 분배 정산 처리
     async function releaseEscrowTx() {
         const id = document.getElementById('escrowId').value;
         if(!id) return alert("Specify valid target vault ID.");
 
         try {
             alert(`Signing release authorization for Vault Index #${id}.`);
-            // 구매자 트랜잭션 검증 시 0.5%는 상단 고정된 ownerFeeWallet으로 직행, 99.5%는 판매자에게 자동 청산
             await escrowContract.methods.release(id).send({ from: userAddress });
             alert(`Vault #${id} closed. 0.5% network fee split routed to master registry.`);
         } catch (error) {
@@ -211,7 +232,6 @@
         }
     }
 
-    // [Step 3 환불 구현] 판매자가 자발적으로 원금을 구매자에게 즉각 반환하는 처리
     async function refundEscrowTx() {
         const id = document.getElementById('escrowId').value;
         if(!id) return alert("Specify valid target vault ID.");
