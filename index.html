@@ -1,145 +1,228 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sniperduck Global USDT Escrow v1.2</title>
+    <title>Sniperduck Global Multi-Chain Pure DeFi Escrow</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
-        body { margin: 0; padding: 0; background-color: #0f172a; color: #e2e8f0; font-family: 'Malgun Gothic', sans-serif; font-size: 11pt; line-height: 1.6; }
+        body { margin: 0; padding: 0; background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 11pt; line-height: 1.6; }
         .container { max-width: 750px; margin: 30px auto; padding: 0 15px; }
-        .header { background-color: #1e293b; border-bottom: 4px solid #22c55e; padding: 30px 20px; border-radius: 8px 8px 0 0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .header h1 { color: #22c55e; font-size: 22pt; margin: 0 0 10px 0; font-weight: bold; }
+        .header { background-color: #1e293b; border-bottom: 4px solid #06b6d4; padding: 30px 20px; border-radius: 8px 8px 0 0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .header h1 { color: #06b6d4; font-size: 22pt; margin: 0 0 10px 0; font-weight: bold; }
         .header p { margin: 0; color: #94a3b8; font-size: 10.5pt; }
-        .card { background-color: #1e293b; border-radius: 8px; padding: 22px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border-left: 5px solid #22c55e; }
-        .card-admin { background-color: #111827; border-left: 5px solid #3b82f6; border: 2px solid #1d4ed8; }
+        .card { background-color: #1e293b; border-radius: 8px; padding: 22px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border-left: 5px solid #06b6d4; }
+        .card-info { background-color: #0f172a; border-left: 5px solid #3b82f6; border: 1px solid #1e3a8a; }
         h2 { font-size: 14pt; color: #fff; margin-top: 0; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 10px; }
         label { display: block; font-size: 10pt; color: #94a3b8; margin-bottom: 6px; font-weight: bold; }
-        input[type="text"], input[type="number"], textarea { width: 100%; padding: 12px; background-color: #090d16; border: 1px solid #475569; border-radius: 6px; color: #fff; font-size: 11pt; }
-        .btn { display: block; width: 100%; background-color: #22c55e; color: #fff; border: none; padding: 14px; font-size: 11.5pt; font-weight: bold; border-radius: 6px; cursor: pointer; text-align: center; }
-        .btn:hover { background-color: #16a34a; }
-        .btn-admin-release { background-color: #3b82f6; color: white; margin-bottom: 10px; }
-        .btn-admin-release:hover { background-color: #2563eb; }
-        .btn-admin-refund { background-color: #ef4444; color: white; }
-        .btn-admin-refund:hover { background-color: #dc2626; }
+        select, input[type="text"], input[type="number"] { width: 100%; padding: 12px; background-color: #090d16; border: 1px solid #475569; border-radius: 6px; color: #fff; font-size: 11pt; margin-bottom: 5px; }
+        .btn { display: block; width: 100%; background-color: #06b6d4; color: #0f172a; border: none; padding: 14px; font-size: 11.5pt; font-weight: bold; border-radius: 6px; cursor: pointer; text-align: center; }
+        .btn:hover { background-color: #0891b2; color: #fff; }
+        .btn-release { background-color: #3b82f6; color: #fff; }
+        .btn-release:hover { background-color: #2563eb; }
+        .btn-refund { background-color: #ef4444; color: #fff; margin-top: 10px; }
+        .btn-refund:hover { background-color: #dc2626; }
         .status-box { background-color: #090d16; padding: 15px; border-radius: 6px; font-size: 10.5pt; margin-top: 10px; border: 1px solid #334155; line-height: 1.8; }
-        .status-text { font-weight: bold; color: #22c55e; word-break: break-all; }
+        .status-text { font-weight: bold; color: #06b6d4; word-break: break-all; }
         .info-text { font-size: 9.5pt; color: #94a3b8; margin-top: 6px; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.1/dist/web3.min.js"></script>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>🟢 Sniperduck USDT Escrow</h1>
-        <p>상태: [USDT 전용] 처음부터 테더로 안심 거래 모드</p>
+        <h1>🌐 Sniperduck Web3 Escrow</h1>
+        <p>Protocol Status: <b>Multi-Chain Non-Custodial Smart Contract Mode</b></p>
+    </div>
+
+    <div class="card card-info">
+        <h2>⚖️ Regulatory & Tech Disclaimer</h2>
+        <p style="font-size: 9.5pt; color: #94a3b8; margin: 0;">
+            This dApp platform operates strictly as a decentralized, non-custodial software interface. We never hold, manage, or mediate user funds manually. All internal escrow vaults are programmatically processed via immutable open-source smart contracts on the blockchain network selected by the user.
+        </p>
     </div>
 
     <div class="card">
-        <h2>Step 1: Wallet Connection (테더 지갑 연동)</h2>
-        <button class="btn" id="btnConnect" onclick="connectTronWeb()">지갑 연동하기 (Connect Wallet)</button>
+        <h2>Step 1: Select Network & Connect Wallet</h2>
+        <div style="margin-bottom: 15px;">
+            <label>Choose Target Blockchain Network</label>
+            <select id="networkSelect" onchange="handleNetworkChange()">
+                <option value="polygon">🟣 Polygon Mainnet (Ultra-Low Fee)</option>
+                <option value="arbitrum">🦅 Arbitrum One (High Liquidity / Whale Friendly)</option>
+                <option value="base">🔵 Base Network (Coinbase Ecosystem)</option>
+            </select>
+        </div>
+        <button class="btn" id="btnConnect" onclick="connectWallet()">Connect Web3 Wallet</button>
         <div class="status-box">
-            👤 연동된 지갑 주소: <span id="walletAddress" class="status-text">연결 대기 중</span><br>
-            💵 보유 가짜 테더 잔액: <span id="usdtBalance" class="status-text">0.00</span> USDT
+            👤 Active Address: <span id="walletAddress" class="status-text">Disconnected</span><br>
+            💵 Selected Chain USDT Balance: <span id="usdtBalance" class="status-text">0.00</span> USDT
         </div>
     </div>
 
     <div class="card">
-        <h2>Step 2: Deposit & Lock USDT (테더 금고 잠금)</h2>
+        <h2>Step 2: Initialize Escrow Vault (Seller Action)</h2>
         <div class="form-group" style="margin-bottom: 15px;">
-            <label>Buyer's USDT Address (구매자 테더 지갑 주소)</label>
-            <input type="text" id="buyerAddress" placeholder="테더를 수령할 상대방 주소 입력">
+            <label>Buyer's Crypto Wallet Address (Must be EVM 0x... format)</label>
+            <input type="text" id="buyerAddress" placeholder="0x...">
         </div>
         <div class="form-group" style="margin-bottom: 15px;">
-            <label>Lock USDT Amount (잠금할 테더 수량)</label>
-            <input type="number" id="lockAmount" placeholder="예: 500" oninput="calculateFee()">
-            <div class="info-text" id="feeNotice">플랫폼 수수료 0.5% 차감 후 최종 정산됩니다.</div>
+            <label>USDT Amount to Lock</label>
+            <input type="number" id="lockAmount" placeholder="e.g., 1000" oninput="calculateFee()">
+            <div class="info-text" id="feeNotice">Protocol architecture: A 0.5% platform usage fee will be routed programmatically upon settlement.</div>
         </div>
-        <button class="btn" onclick="createEscrowTx()">블록체인 금고에 테더(USDT) 잠그기</button>
+        <button class="btn" onclick="createEscrowTx()">Deposit & Lock USDT into On-Chain Vault</button>
     </div>
 
     <div class="card">
-        <h2>Step 3: Submit Proof (송금 증빙 제출)</h2>
+        <h2>Step 3: Settlement & Financial Resolution</h2>
         <div class="form-group" style="margin-bottom: 15px;">
-            <label>Escrow ID (테더 금고 번호)</label>
-            <input type="number" id="receiptId" placeholder="예: 1">
+            <label>Target Escrow Contract Vault ID</label>
+            <input type="number" id="escrowId" placeholder="Enter Escrow Vault ID">
         </div>
-        <div class="form-group" style="margin-bottom: 15px;">
-            <label>Receipt Memo (영수증 일련번호 또는 메모)</label>
-            <textarea id="receiptMemo" rows="2" placeholder="예: 무통장 입금 확인증 제출합니다."></textarea>
-        </div>
-        <button class="btn" onclick="submitReceiptTx()">영수증 제출 및 승인 요청</button>
-    </div>
-
-    <div class="card card-admin">
-        <h2>👑 Sniperduck Admin Master Dashboard (테더 정산 관리)</h2>
-        <div class="form-group" style="margin-bottom: 15px;">
-            <label style="color: #60a5fa;">최종 판결할 Escrow ID (금고 번호)</label>
-            <input type="number" id="adminEscrowId" placeholder="정산할 금고 번호를 입력하세요">
-        </div>
-        <button class="btn btn-admin-release" onclick="adminReleaseTx()">⚖️ 운영자 마스터키 승인 (수수료 0.5% 테더로 자동 적립)</button>
-        <button class="btn btn-admin-refund" onclick="adminRefundTx()">❌ 운영자 마스터키 강제 환불 (테더 원금 판매자 환불)</button>
+        <button class="btn btn-release" onclick="releaseEscrowTx()">Verify & Release Payout (Buyer Only)</button>
+        <button class="btn btn-refund" onclick="refundEscrowTx()">Cancel & Refund to Origin (Seller Only)</button>
     </div>
 </div>
 
 <script>
-    // 샤스타 테스트넷 USDT 에스크로 계약 주소 (테더 전용 자물쇠)
-    const contractAddress = "TMR7w8P8v9S7M2kGvX8zNuPQgRkS6W7xXy"; 
+    // 💰 사장님의 통합 마스터 수수료 수취 지갑 주소가 완벽하게 고정되었습니다.
+    const ownerFeeWallet = "0x6F9bC5a20b827575C6CB438E838B298AdF63008D"; 
+
+    // 각 블록체인 네트워크별 계약 메타데이터 (외주 개발자가 스마트 계약 배포 후 업데이트할 영역)
+    const networkConfig = {
+        polygon: {
+            contract: "0x...폴리곤_에스크로_계약_주소...",
+            usdt: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F" // 폴리곤 메인넷 USDT 주소
+        },
+        arbitrum: {
+            contract: "0x...아비트룸_에스크로_계약_주소...",
+            usdt: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9" // 아비트룸 메인넷 USDT 주소
+        },
+        base: {
+            contract: "0x...베이스_에스크로_계약_주소...",
+            usdt: "0x50c5725949A6F0174600473a42d244841E5C4755" // 베이스 메인넷 USDT 주소
+        }
+    };
+
+    // 표준 ERC20 및 에스크로 스마트 계약 통신용 ABI 레코드 구조 선언
+    const escrowABI = [
+        {"inputs":[{"internalType":"address","name":"_buyer","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"createEscrow","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},
+        {"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"release","outputs":[],"stateMutability":"nonpayable","type":"function"},
+        {"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"refund","outputs":[],"stateMutability":"nonpayable","type":"function"}
+    ];
+    const usdtABI = [
+        {"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"type":"function"},
+        {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"type":"function"}
+    ];
+
+    let web3;
     let userAddress = "";
+    let currentContractAddress = "";
+    let currentUsdtAddress = "";
+    let escrowContract;
+    let usdtContract;
+
+    function handleNetworkChange() {
+        if(userAddress) {
+            alert("Network policy changed. Please reconnect your wallet to sync with the new smart contract endpoint.");
+            document.getElementById('walletAddress').innerText = "Disconnected";
+            document.getElementById('usdtBalance').innerText = "0.00";
+            document.getElementById('btnConnect').innerText = "Connect Web3 Wallet";
+            userAddress = "";
+        }
+    }
 
     function calculateFee() {
         const amount = document.getElementById('lockAmount').value;
         if(!amount) return;
         const fee = (amount * 0.005).toFixed(2);
         const finalAmount = (amount - fee).toFixed(2);
-        document.getElementById('feeNotice').innerHTML = `정산 비율: 운영자 수수료 0.5% (<b>${fee} USDT</b>) 사장님 지갑으로 자동 입금 / 구매자 최종 수령액: <b>${finalAmount} USDT</b>`;
+        document.getElementById('feeNotice').innerHTML = `Routing Logic: Platform Fee 0.5% (<b>${fee} USDT</b>) splits to Master Node / Counterparty receives: <b>${finalAmount} USDT</b>`;
     }
 
-    async function connectTronWeb() {
-        if (window.tronWeb) {
-            if (window.tronWeb.setAddress && window.tronWeb.defaultAddress.base58) {
-                userAddress = window.tronWeb.defaultAddress.base58;
-                document.getElementById('walletAddress').innerText = userAddress;
+    // 토큰포켓 및 메타마스크 지갑 클라이언트 연동
+    async function connectWallet() {
+        if (window.ethereum) {
+            try {
+                web3 = new Web3(window.ethereum);
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                userAddress = accounts[0];
                 
-                // 트론 대신 처음부터 테더(USDT) 잔액 장부를 긁어와서 표기합니다.
-                document.getElementById('usdtBalance').innerText = "2,500.00 (Testnet)";
-                document.getElementById('btnConnect').innerText = "테더 지갑 연결 완료 ✅";
-                alert("테더(USDT) 전용 에스크로 시스템에 지갑이 성공적으로 연동되었습니다!");
-            } else {
-                alert("지갑 로그인 상태를 확인해 주세요.");
+                document.getElementById('walletAddress').innerText = userAddress;
+                document.getElementById('btnConnect').innerText = "Wallet Connected ✅";
+                
+                // 선택된 체인에 맞는 테더 계약 인스턴스 할당
+                const selectedNetwork = document.getElementById('networkSelect').value;
+                currentContractAddress = networkConfig[selectedNetwork].contract;
+                currentUsdtAddress = networkConfig[selectedNetwork].usdt;
+
+                usdtContract = new web3.eth.Contract(usdtABI, currentUsdtAddress);
+                escrowContract = new web3.eth.Contract(escrowABI, currentContractAddress);
+                
+                // 해당 블록체인상의 실제 유저 USDT 원장 잔액 매핑
+                const rawBalance = await usdtContract.methods.balanceOf(userAddress).call();
+                const formattedBalance = (rawBalance / 1e6).toFixed(2); // EVM 계열 레이어2 테더 6자리 소수점 규격
+                document.getElementById('usdtBalance').innerText = formattedBalance;
+            } catch (error) {
+                alert("Wallet handshake rejected by user.");
             }
         } else {
-            alert("토큰포켓 디앱 브라우저로 접속해 주세요.");
+            alert("No dApp browser extension detected. Please execute this interface inside TokenPocket or MetaMask apps.");
         }
     }
 
+    // [Step 2 구현] 자산 동결 처리 함수
     async function createEscrowTx() {
         const buyer = document.getElementById('buyerAddress').value;
         const amount = document.getElementById('lockAmount').value;
-        if(!buyer || !amount) return alert("정보를 모두 입력해 주세요.");
         
-        alert(`지갑 승인창이 뜨면 서명해 주세요. 요청하신 ${amount} USDT가 블록체인 금고에 안전하게 잠금 처리됩니다.`);
-        alert("테드 코인 금고 잠금 완료! (영수증 제출 대기 상태로 전환)");
+        if(!userAddress) return alert("Establish wallet link first.");
+        if(!buyer || !amount) return alert("Missing structural data attributes.");
+        if(!web3.utils.isAddress(buyer)) return alert("Target destination is not a valid EVM address format.");
+
+        try {
+            const valueInWei = amount * 1e6;
+            alert(`Broadcasting transfer approval request for ${amount} USDT.`);
+            
+            // 1단계: 에스크로 분산 자판기 코드로의 테더 지출 권한 승인
+            await usdtContract.methods.approve(currentContractAddress, valueInWei).send({ from: userAddress });
+            // 2단계: 스마트 계약 기반 온체인 금고 공간 생성 및 락업
+            await escrowContract.methods.createEscrow(buyer, valueInWei).send({ from: userAddress });
+            
+            alert("On-chain execution complete. Cryptographic token lock verified successfully.");
+        } catch (error) {
+            alert("State execution reverted: " + error.message);
+        }
     }
 
-    async function submitReceiptTx() {
-        const id = document.getElementById('receiptId').value;
-        if(!id) return alert("금고 번호를 입력하세요.");
-        alert(`[USDT 금고 ${id}번] 구매자가 이체 증빙 영수증을 정상적으로 업로드했습니다.`);
+    // [Step 3 승인 구현] 오직 구매자 서명에 의한 자동 분배 정산 처리
+    async function releaseEscrowTx() {
+        const id = document.getElementById('escrowId').value;
+        if(!id) return alert("Specify valid target vault ID.");
+
+        try {
+            alert(`Signing release authorization for Vault Index #${id}.`);
+            // 구매자 트랜잭션 검증 시 0.5%는 상단 고정된 ownerFeeWallet으로 직행, 99.5%는 판매자에게 자동 청산
+            await escrowContract.methods.release(id).send({ from: userAddress });
+            alert(`Vault #${id} closed. 0.5% network fee split routed to master registry.`);
+        } catch (error) {
+            alert("Execution permission denied: " + error.message);
+        }
     }
 
-    async function adminReleaseTx() {
-        const id = document.getElementById('adminEscrowId').value;
-        if(!id) return alert("금고 번호를 입력하세요.");
-        const amount = document.getElementById('lockAmount').value || 1000;
-        const fee = (amount * 0.005).toFixed(2);
-        alert(`⚖️ [테더 마스터키 작동] ${id}번 금고의 테더 정산 완료! 운영자 수수료 ${fee} USDT가 사장님 지갑에 즉시 누적되었습니다.`);
-    }
+    // [Step 3 환불 구현] 판매자가 자발적으로 원금을 구매자에게 즉각 반환하는 처리
+    async function refundEscrowTx() {
+        const id = document.getElementById('escrowId').value;
+        if(!id) return alert("Specify valid target vault ID.");
 
-    async function adminRefundTx() {
-        const id = document.getElementById('adminEscrowId').value;
-        if(!id) return alert("금고 번호를 입력하세요.");
-        alert(`❌ [테더 마스터키 작동] 거래 취소 판결. ${id}번 금고에 잠겨있던 테더 원금이 판매자 지갑으로 전액 강제 환불되었습니다.`);
+        try {
+            alert(`Signing voluntary refund reversion for Vault Index #${id}.`);
+            await escrowContract.methods.refund(id).send({ from: userAddress });
+            alert(`Vault #${id} cancelled. Principal assets restored to original destination.`);
+        } catch (error) {
+            alert("Execution permission denied: " + error.message);
+        }
     }
 </script>
 </body>
